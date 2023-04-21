@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.booking.mapper.BookingMapper">
+
+    <resultMap id="bookingResultMap" type="com.example.demo.booking.Booking">
+        <id column="id" property="id"/>
+        <result column="main_code" property="mainCode"/>
+        <result column="use_date" property="useDate"/>
+    </resultMap>
+
+    <select id="findById" resultMap="bookingResultMap">
+        SELECT * FROM booking WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.booking.Booking">
+        INSERT INTO booking (id, main_code, use_date)
+        VALUES (#{id}, #{mainCode}, #{useDate})
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.booking.Booking">
+        UPDATE booking SET main_code = #{mainCode}, use_date = #{useDate}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM booking WHERE id = #{id}
+    </delete>
+
+    <select id="findByMainCodeAndUseDate" resultMap="bookingResultMap">
+        SELECT * FROM booking WHERE main_code = #{mainCode} AND use_date = #{useDate}
+    </select>
+
+    <select id="findByMainCodeAndUseDateBetween" resultMap="bookingResultMap">
+        SELECT * FROM booking WHERE main_code = #{mainCode} AND use_date BETWEEN #{start} AND #{end}
+    </select>
+    
+    <select id="selectByMainCodeAndUseDate" resultMap="bookingResultMap">
+        SELECT * FROM booking WHERE main_code = #{mainCode} AND use_date = #{useDate}
+    </select>
+
+</mapper>
