@@ -23,11 +23,18 @@ import java.util.List;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    
+    @Column(name = "booking_code")
     private Long id;
+    
+    @Column(name = "booking_date")
+    private LocalDateTime bookingDate;
 
     @Column(name = "main_code")
     private Long mainCode;
+    
+    @Column(name = "user_code")
+    private Long userCode;
 
     @Column(name = "use_date")
     private LocalDateTime useDate;

@@ -3,6 +3,7 @@ package com.example.demo.booking.service;
 import com.example.demo.booking.Booking;
 import com.example.demo.booking.dto.BookingDTO;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,5 +16,6 @@ public interface BookingService {
     void deleteBooking(Long id);
 	List<BookingDTO> getAllBookings();
 	List<String> getAvailableTimes(Long mainCode, LocalDateTime useDate);
+	List<BookingDTO> getBookings(LocalDate startDate, LocalDate endDate);
 	
 }

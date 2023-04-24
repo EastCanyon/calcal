@@ -1,33 +1,31 @@
 package com.example.demo.booking.controller;
 
+import com.example.demo.booking.Booking;
 import com.example.demo.booking.dto.BookingDTO;
 import com.example.demo.booking.repository.BookingRepository;
 import com.example.demo.booking.service.BookingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
+@Controller
 @RequestMapping("/api/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
-    private BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
     public BookingController(BookingService bookingService, BookingRepository bookingRepository) {
         this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
-    }
-
-    public BookingController(BookingService bookingService) {
-        this.bookingService = bookingService;
     }
 
     @GetMapping("/{id}")
@@ -54,8 +52,44 @@ public class BookingController {
         return ResponseEntity.noContent().build();
     }
     
-    @GetMapping("/available-times")
-    public List<LocalDateTime> getAvailableTimes(@RequestParam("useDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate useDate) {
-        return bookingRepository.getAvailableTimes(useDate);
+    @GetMapping
+    public ResponseEntity<List<BookingDTO>> getBookings(@RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                         @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<BookingDTO> bookings;
+        if (startDate != null && endDate != null) {
+            bookings = bookingService.getBookings(startDate, endDate);
+        } else if (startDate != null) {
+            bookings = bookingService.getBookings(startDate, endDate);
+        } else {
+            bookings = bookingService.getBookings(endDate, endDate);
+        }
+        return ResponseEntity.ok(bookings);
     }
+
+
+    @PostMapping("/date")
+    @ResponseBody
+    public String handleDateRequest(@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, Model model) {
+        // 날짜 처리 작업 수행
+        String result = "This is the result of date processing for " + date.toString();
+
+        // 처리 결과를 모델에 저장하고 view 이름을 반환
+        model.addAttribute("result", result);
+        return "viewName";
+    }
+    
+    @GetMapping("/by-date")
+    @ResponseBody
+    public List<Booking> getBookingsByDate(@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        if (date != null) {
+            LocalDateTime start = date.atStartOfDay();
+            LocalDateTime end = date.plusDays(1).atStartOfDay();
+            return bookingRepository.findByUseDateBetween(start, end);
+        } else {
+            return bookingRepository.findAll();
+        }
+    }
+
+
 }
+

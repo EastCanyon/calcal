@@ -27,4 +27,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 	
 	@Query("select b.startTime from Booking b where b.useDate = :useDate order by b.startTime")
     List<LocalDateTime> getAvailableTimes(@Param("useDate") LocalDate useDate);
+	
+    List<Booking> findByUseDate(LocalDate date);
+
+	List<Booking> findByUseDateBetween(LocalDateTime start, LocalDateTime end);
 }
