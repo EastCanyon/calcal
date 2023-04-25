@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Controller
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -77,13 +79,13 @@ public class BookingController {
         model.addAttribute("result", result);
         return "viewName";
     }
-    
+    //예약 데이터를 조회하려고 하는 날짜의 00:00:00부터 23:59:59까지 조회
     @GetMapping("/by-date")
     @ResponseBody
     public List<Booking> getBookingsByDate(@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         if (date != null) {
             LocalDateTime start = date.atStartOfDay();
-            LocalDateTime end = date.plusDays(1).atStartOfDay();
+            LocalDateTime end = date.atTime(LocalTime.MAX);
             return bookingRepository.findByUseDateBetween(start, end);
         } else {
             return bookingRepository.findAll();

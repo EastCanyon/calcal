@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -23,8 +24,6 @@ import java.util.List;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    
-    @Column(name = "booking_code")
     private Long id;
     
     @Column(name = "booking_date")
@@ -40,25 +39,24 @@ public class Booking {
     private LocalDateTime useDate;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Column(name = "end_time")
-    private LocalDateTime endTime;
+    private LocalTime endTime;
 
     public Booking(BookingDTO bookingDTO) {
-        this.id = bookingDTO.getId();
         this.mainCode = bookingDTO.getMainCode();
         this.useDate = LocalDateTime.of(bookingDTO.getUseDate(), bookingDTO.getStartTime());
-        this.startTime = LocalDateTime.of(bookingDTO.getUseDate(), bookingDTO.getStartTime());
-        this.endTime = LocalDateTime.of(bookingDTO.getUseDate(), bookingDTO.getEndTime());
+        this.startTime = bookingDTO.getStartTime();
+        this.endTime = bookingDTO.getEndTime();
     }
 
-    public List<LocalTime> getAvailableTimes() {
+    public List<String> getAvailableTimes() {
         List<LocalTime> availableTimes = new ArrayList<>();
 
         // Implement logic to get available times for this booking
         // ...
 
-        return availableTimes;
+        return availableTimes.stream().map(LocalTime::toString).collect(Collectors.toList());
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -50,9 +51,16 @@ public class BookingServiceImp implements BookingService {
         if (optionalBooking.isPresent()) {
             Booking booking = optionalBooking.get();
             booking.setMainCode(bookingDTO.getMainCode());
-            booking.setUseDate(LocalDateTime.of(bookingDTO.getUseDate(), bookingDTO.getStartTime()));
-            booking.setStartTime(LocalDateTime.of(bookingDTO.getUseDate(), bookingDTO.getStartTime()));
-            booking.setEndTime(LocalDateTime.of(bookingDTO.getUseDate(), bookingDTO.getEndTime()));
+            LocalDate useDate = bookingDTO.getUseDate();
+            LocalTime startTime = bookingDTO.getStartTime().toLocalTime();
+            LocalTime endTime = bookingDTO.getEndTime().toLocalTime();
+
+            LocalDateTime startDateTime = LocalDateTime.of(useDate, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(useDate, endTime);
+
+            booking.setStartTime(startDateTime);
+            booking.setEndTime(endDateTime);
+
             Booking savedBooking = bookingRepository.save(booking);
             return new BookingDTO(savedBooking);
         }
