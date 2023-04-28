@@ -39,4 +39,15 @@
         SELECT * FROM booking WHERE main_code = #{mainCode} AND use_date = #{useDate}
     </select>
 
+<select id="findByMainCodeAndUseDateAndTimeBetween" resultType="com.example.demo.booking.Booking">
+    SELECT *
+    FROM booking
+    WHERE main_code = #{mainCode}
+    AND use_date = #{useDate}
+    AND booking_time BETWEEN #{startTime} AND #{endTime}
+</select>
+
+
+
+
 </mapper>

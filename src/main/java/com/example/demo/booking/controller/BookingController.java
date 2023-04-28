@@ -6,6 +6,7 @@ import com.example.demo.booking.repository.BookingRepository;
 import com.example.demo.booking.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,81 +18,56 @@ import java.time.LocalTime;
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@Controller
+@RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
 
-    private final BookingService bookingService;
-    private final BookingRepository bookingRepository;
-
     @Autowired
-    public BookingController(BookingService bookingService, BookingRepository bookingRepository) {
-        this.bookingService = bookingService;
-        this.bookingRepository = bookingRepository;
-    }
+    private BookingService bookingService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BookingDTO> getBooking(@PathVariable Long id) {
-        BookingDTO booking = bookingService.getBooking(id);
-        return ResponseEntity.ok(booking);
-    }
-
+    // 예약 생성 API
     @PostMapping
     public ResponseEntity<BookingDTO> createBooking(@RequestBody BookingDTO bookingDTO) {
         BookingDTO createdBooking = bookingService.createBooking(bookingDTO);
-        return ResponseEntity.ok(createdBooking);
+        return new ResponseEntity<>(createdBooking, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BookingDTO> updateBooking(@PathVariable Long id, @RequestBody BookingDTO bookingDTO) {
-        BookingDTO updatedBooking = bookingService.updateBooking(id, bookingDTO);
-        return ResponseEntity.ok(updatedBooking);
+    // 예약 조회 API
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<BookingDTO> getBooking(@PathVariable Long bookingId) {
+        BookingDTO bookingDTO = bookingService.getBooking(bookingId);
+        return new ResponseEntity<>(bookingDTO, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
-        bookingService.deleteBooking(id);
-        return ResponseEntity.noContent().build();
+    // 예약 수정 API
+    @PutMapping("/{bookingId}")
+    public ResponseEntity<BookingDTO> updateBooking(@PathVariable Long bookingId, @RequestBody BookingDTO bookingDTO) {
+        BookingDTO updatedBooking = bookingService.updateBooking(bookingId, bookingDTO);
+        return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
     }
-    
+
+    // 예약 삭제 API
+    @DeleteMapping("/{bookingId}")
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long bookingId) {
+        bookingService.deleteBooking(bookingId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // 날짜별 예약 조회 API
     @GetMapping
-    public ResponseEntity<List<BookingDTO>> getBookings(@RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                                                         @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        List<BookingDTO> bookings;
-        if (startDate != null && endDate != null) {
-            bookings = bookingService.getBookings(startDate, endDate);
-        } else if (startDate != null) {
-            bookings = bookingService.getBookings(startDate, endDate);
-        } else {
-            bookings = bookingService.getBookings(endDate, endDate);
-        }
-        return ResponseEntity.ok(bookings);
+    public ResponseEntity<List<BookingDTO>> getBookingsByDate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        List<BookingDTO> bookings = bookingService.getBookingsByDate(date);
+        return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
-
-    @PostMapping("/date")
-    @ResponseBody
-    public String handleDateRequest(@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, Model model) {
-        // 날짜 처리 작업 수행
-        String result = "This is the result of date processing for " + date.toString();
-
-        // 처리 결과를 모델에 저장하고 view 이름을 반환
-        model.addAttribute("result", result);
-        return "viewName";
+    // 시간대별 예약 조회 API
+    @GetMapping
+    public ResponseEntity<List<BookingDTO>> getBookingsByDateAndTimeRange(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+                                                                          @RequestParam("startTime") @DateTimeFormat(pattern = "HH:mm") LocalTime startTime,
+                                                                          @RequestParam("endTime") @DateTimeFormat(pattern = "HH:mm") LocalTime endTime) {
+        List<BookingDTO> bookings = bookingService.getBookingsByDateAndTimeRange(date, startTime, endTime);
+        return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
-    //예약 데이터를 조회하려고 하는 날짜의 00:00:00부터 23:59:59까지 조회
-    @GetMapping("/by-date")
-    @ResponseBody
-    public List<Booking> getBookingsByDate(@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (date != null) {
-            LocalDateTime start = date.atStartOfDay();
-            LocalDateTime end = date.atTime(LocalTime.MAX);
-            return bookingRepository.findByUseDateBetween(start, end);
-        } else {
-            return bookingRepository.findAll();
-        }
-    }
-
-
 }
+
 
